@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", sans-serif;
+  --color-silver: #cdcccd;
+  --color-metallic-gold: #C9AB31;
+  --color-pine-teal: #005244;
+  --color-evergreen-light: #003B31;
+  --color-evergreen-dark: #0D2D2A;
+  --color-evergreen-darker: #00221f;
+}
+
+@layer base {
+  * {
+    @apply font-display scroll-smooth;
+  }
+
+  body {
+    @apply overflow-x-hidden bg-evergreen-dark text-silver;
+  }
+
+  button,
+  a {
+    @apply cursor-pointer select-none;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 p-2
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-silver/40
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-silver/80
+  }
+
+  ::-webkit-scrollbar-button {
+    @apply hidden
+  }
+
+}
+
+@layer components {
+  #root {
+    @apply h-screen;
+  }
+}
