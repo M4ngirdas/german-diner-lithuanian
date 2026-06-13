@@ -1,20 +1,86 @@
 
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { LuShoppingCart } from "react-icons/lu"
+import { useNavigate, useLocation } from "react-router-dom"
+import { LuArrowBigLeft, LuArrowLeft, LuChevronLeft, LuGlobe, LuLoaderCircle, LuMenu, LuShoppingCart } from "react-icons/lu"
+import { useLanguageStore } from "../store.js"
+import { normalItems, yourExperienceItems } from "../data/header.js"
 
+import Sidebar from "./Sidebar.jsx"
 import logo from "../images/logo.png"
-import Cart from "./Cart.jsx"
+import lithuaniaFlag from "../images/flags/lithuania.png"
+import usaFlag from "../images/flags/usa.png"
 
 export default function Header(props) {
 
-    const [isCartOpen, setIsCartOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
+    const [isSidebarShown, setIsSidebarShown] = useState(false)
 
+    const { pathname } = useLocation()
+    const language = useLanguageStore(state => state.language)
+    const setLanguage = useLanguageStore(state => state.setLanguage)
     const navigate = useNavigate()
-    const totalCartItems = props.cartItems.reduce((acc, item) => {
-        return acc + item.quantity
-    }, 0)
+
+    if (isLoading) {
+        document.body.classList.add("loading")
+    } else {
+        document.body.classList.remove("loading")
+    }
+
+    const normalElements = normalItems.map((item, index) => {
+        return (
+            <a
+                key={index}
+                onClick={() => {
+                    navigate(item.path)
+                    setIsSidebarShown(false)
+                }}
+                href={item.href}
+                className="peer w-fit transition-all duration-300 hover:text-metallic-gold hover:scale-95"
+            >
+                {language === "lt" ? item.name.lt : item.name.en}
+            </a>
+        )
+    })
+
+    const yourExperienceElements = yourExperienceItems.map((item, index) => {
+        return (
+            <a
+                key={index}
+                onClick={() => {
+                    navigate(item.path)
+                    setIsSidebarShown(false)
+                }}
+                href={item.href}
+                className="peer w-fit transition-all duration-300 hover:text-metallic-gold hover:scale-95"
+            >
+                {language === "lt" ? item.name.lt : item.name.en}
+            </a>
+        )
+    })
+
+    function renderItems() {
+        switch (pathname) {
+            case "/categories":
+            case "/categories/menu":
+            case "/home":
+            case "/":
+                return normalElements
+                break
+
+            case "/your-experience":
+                return yourExperienceElements
+                break
+        }
+    }
+
+    function changeLanguage() {
+        setIsLoading(true)
+        setTimeout(() => {
+            setLanguage()
+            setIsLoading(false)
+        }, 700)
+    }
 
     useEffect(() => {
         function onScroll() {
@@ -24,37 +90,47 @@ export default function Header(props) {
             }
             setIsScrolled(false)
         }
+
         window.addEventListener("scroll", onScroll)
         return () => window.removeEventListener("scroll", onScroll)
     }, [])
 
     return (
         <>
-            <header className={`${isScrolled ? "py-3" : "py-6"} flex justify-center transition-all duration-300 z-40 w-full fixed top-0 shadow-lg bg-evergreen-darker`}>
-                <div className="flex justify-between items-center w-[80%]">
+            <Sidebar
+                isSidebarShown={isSidebarShown}
+                setIsSidebarShown={setIsSidebarShown}
+                changeLanguage={changeLanguage}
+                renderItems={renderItems}
+            />
+            <div className={`${isLoading ? "opacity-100 overflow-hidden" : "opacity-0 pointer-events-none"} grid place-items-center content-center gap-2 transition-opacity duration-200 fixed inset-0 z-50 bg-evergreen-dark`}>
+                <h1 className="flex items-center gap-2 text-4xl"><LuLoaderCircle className="animate-spin" /> Loading</h1>
+            </div>
+            <header className="flex justify-center py-4 md:py-6 z-40 w-full fixed top-0 shadow-lg bg-evergreen-darker">
+                <div className="flex justify-between items-center w-[90%] lg:w-[80%]">
                     <div className="flex items-center gap-18">
-                        <img
-                            src={logo}
-                            alt="Bavaria lounge logo"
-                            className={`${isScrolled ? "w-25" : "w-35"} duration-300`}
-                        />
                         <div className="flex gap-6">
-                            <a onClick={() => navigate("/home")} href="#start" className="peer transition-all duration-300 hover:text-metallic-gold hover:scale-95">Home</a>
-                            <a onClick={() => navigate("/home")} href="#reservation" className="peer transition-all duration-300 hover:text-metallic-gold hover:scale-95" >Reservation</a>
-                            <a onClick={() => navigate("/home")} href="#contact" className="peer transition-all duration-300 hover:text-metallic-gold hover:scale-95">Contact</a>
-                            <a onClick={() => navigate("/menu")} className="peer transition-all duration-300 hover:text-metallic-gold hover:scale-95">Menu</a>
+                            <a onClick={() => navigate("/home")} href="#start">
+                                <img
+                                    src={logo}
+                                    alt="Bravo restoranas logo"
+                                    className="w-30 transition-all duration-300 cursor-pointer"
+                                />
+                            </a>
                         </div>
+                        <nav className="hidden md:flex gap-6 text-lg">{renderItems()}</nav>
                     </div>
-                    <div className="flex gap-8">
-                        <div className="relative">
-                            <button onClick={() => setIsCartOpen(prev => !prev)} className="flex items-center gap-2 text-lg rounded-sm hover:text-metallic-gold">
-                                <span className="relative">
-                                    {props.cartItems.length > 0 ? <span className={`${totalCartItems > 99 ? "w-5" : ""} grid place-items-center gap-2 font-black absolute text-[11px] -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white`}>{totalCartItems}</span> : null}
-                                    <LuShoppingCart className="text-xl" />
-                                </span>
-                                <span className="flex items-center gap-2">Cart</span>
+                    <div className="flex gap-2">
+                        <button onClick={() => setIsSidebarShown(true)} className="block md:hidden"><LuMenu className="text-2xl" /></button>
+                        <div className="hidden md:flex gap-8">
+                            <button onClick={changeLanguage} className="flex items-center gap-2">
+                                <img
+                                    src={language === "lt" ? lithuaniaFlag : usaFlag}
+                                    alt={language === "lt" ? "Lithuania flag" : "USA flag"}
+                                    className="w-5"
+                                />
+                                {language === "lt" ? "LT" : "EN"}
                             </button>
-                            <Cart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} cartItems={props.cartItems} setCartItems={props.setCartItems} />
                         </div>
                     </div>
                 </div>
