@@ -34,14 +34,14 @@ export default function Menu(props) {
             key={index}
             onClick={ev => navigate("/categories/menu")}
             href={item.href}
-            className="cursor-pointer relative select-none transition-transform duration-200"
+            className="relative overflow-hidden cursor-pointer select-none transition-transform duration-200 hover:scale-98"
         >
             <img
                 src={item.imgSrc}
                 alt={language === "lt" ? item.name.lt : item.name.en}
-                className="peer rounded-t-sm"
+                className="object-cover transition-tranform duration-300 rounded-sm"
             />
-            <h2 className="grid place-items-center rounded-b-sm p-6 uppercase text-lg tracking-wider font-medium transition-all duration-200 bg-evergreen-light">{language === "lt" ? item.name.lt : item.name.en}</h2>
+            <h2 className="grid place-items-center content-center p-6 whitespace-nowrap w-full rounded-sm uppercase text-lg tracking-wider font-medium transition-colors duration-300 bg-evergreen-light">{language === "lt" ? item.name.lt : item.name.en}</h2>
         </a>
     )
 
